@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: relio-api
+    runtime: go
+    rootDir: backend
+    plan: starter
+    buildCommand: mkdir -p bin && go build -o bin/relio-api .
+    startCommand: ./bin/relio-api
+    healthCheckPath: /healthz
+    envVars:
+      - key: RELIO_DATASET_VERSION
+        sync: false
+      - key: NEO4J_URI
+        sync: false
+      - key: NEO4J_USERNAME
+        sync: false
+      - key: NEO4J_PASSWORD
+        sync: false
+      - key: NEO4J_DATABASE
+        sync: false
+
+  - type: web
+    name: relio-frontend
+    runtime: node
+    rootDir: frontend
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 22.17.0
+      - key: RELIO_DATA_MODE
+        value: api
+      - key: RELIO_API_URL
+        value: http://relio-api:10000
