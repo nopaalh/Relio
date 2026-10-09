@@ -21,6 +21,9 @@ func NewDealService(deals repository.DealRepository) *DealService {
 }
 
 func (s *DealService) List(ctx context.Context, asOf time.Time) ([]models.Deal, error) {
+	if s.deals == nil {
+		return nil, repository.ErrDealDataUnavailable
+	}
 	return s.deals.List(ctx, asOf)
 }
 
@@ -28,6 +31,9 @@ func (s *DealService) FindByID(ctx context.Context, dealID string, asOf time.Tim
 	dealID = strings.TrimSpace(dealID)
 	if dealID == "" {
 		return models.Deal{}, ErrInvalidDealID
+	}
+	if s.deals == nil {
+		return models.Deal{}, repository.ErrDealDataUnavailable
 	}
 
 	return s.deals.FindByID(ctx, dealID, asOf)

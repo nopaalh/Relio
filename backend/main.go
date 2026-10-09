@@ -23,10 +23,13 @@ func main() {
 
 	healthService := services.NewHealthService()
 	healthController := controllers.NewHealthController(healthService)
+	// Keep deal data unavailable until the agreed static database adapter is wired.
+	dealService := services.NewDealService(nil)
+	dealController := controllers.NewDealController(dealService)
 
 	server := &http.Server{
 		Addr:              addr,
-		Handler:           routes.NewHandler(healthController),
+		Handler:           routes.NewHandler(healthController, dealController),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 

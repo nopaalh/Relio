@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/nopaalh/Relio/backend/models"
+	"github.com/nopaalh/Relio/backend/repository"
 )
 
 type stubDealRepository struct {
@@ -78,5 +79,34 @@ func TestDealServicePreservesRepositoryError(t *testing.T) {
 	_, err := NewDealService(repo).List(context.Background(), time.Time{})
 	if !errors.Is(err, want) {
 		t.Fatalf("error = %v, want %v", err, want)
+	}
+}
+
+func TestDealServiceWithoutRepository(t *testing.T) {
+	service := NewDealService(nil)
+	ctx := context.Background()
+
+	deals, err := service.List(ctx, time.Time{})
+	if !errors.Is(err, repository.ErrDealDataUnavailable) || deals != nil {
+		t.Fatalf("List without adapter: deals=%+v, error=%v", deals, err)
+	}
+	_, err = service.FindByID(ctx, "DL-001", time.Time{})
+	if !errors.Is(err, repository.ErrDealDataUnavailable) {
+		t.Fatalf("FindByID without adapter: error=%v", err)
+	}
+	_, err = service.FindByID(ctx, " ", time.Time{})
+	if !errors.Is(err, ErrInvalidDealID) {
+		t.Fatalf("empty ID must still be validated: error=%v", err)
+	}
+}
+
+func TestDealServiceFindPreservesRepositoryError(t *testing.T) {
+	for _, want := range []error{repository.ErrDealNotFound, repository.ErrDealDataUnavailable, errors.New("query failed")} {
+		t.Run(want.Error(), func(t *testing.T) {
+			_, err := NewDealService(&stubDealRepository{err: want}).FindByID(context.Background(), "DL-001", time.Time{})
+			if !errors.Is(err, want) {
+				t.Fatalf("error = %v, want %v", err, want)
+			}
+		})
 	}
 }
