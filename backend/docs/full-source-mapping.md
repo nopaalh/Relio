@@ -3,8 +3,8 @@
 Mapping-v1 processes all 15 audited files once offline; no runtime CSV, ETL pipeline or refresh. All native source values remain in field evidence; snapshot-only values available at 2026-10-01.
 
 - CRM accounts/deals/contacts/employees: source IDs and nullable commercial facts; no historical stage/owner inference.
-- Employment: composite locator all six native fields; SourceRecordID empty; WORKED_AT effective [start,end+1), parallel roles preserved.
-- Interactions: native account, meeting participants and reply edges; no automatic deal FK or verified historical email alias. Current email candidates unresolved.
+- Employment: composite locator all six native fields; SourceRecordID empty; outward historical locator omits future selesai (explicit Meta limitation; stable opaque evidence ID/file SHA retained). WORKED_AT effective [start,end+1), parallel roles preserved; every timeline event has a graph focus node.
+- Interactions: native account, meeting participants and reply edges; no automatic deal FK or email/profile alias inference. Raw email identities remain unresolved; a current match does not establish historical/foreign-account association.
 - Decision: native date/type/value/status/actor/deal links; alasan/status_janji conservative snapshot-only to prevent retrospective outcome leakage.
 - Contract: creation/native identity anchors at mulai; mutable terms/discount/decision link snapshot-only. No date/amount matching join.
 - Ticket/bug/release/feature: native IDs, source references and creation/release anchors; current support/status/roadmap fields snapshot-only.

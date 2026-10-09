@@ -27,10 +27,18 @@ func (b *builder) business() {
 		for _, field := range []string{"diminta_oleh", "diputuskan_oleh"} {
 			if row[field] != "" {
 				p := nativeParticipant(row[field], ev[field])
-				e.Actors = append(e.Actors, p)
+				if field == "diputuskan_oleh" {
+					e.Actors = append(e.Actors, p)
+				} else {
+					e.Participants = append(e.Participants, p)
+				}
 				b.node(*p.NodeID, "person", row[field], a, at, known(row[field], "event", ev[field]), []string{ev[field]})
 				e.NodeIDs = append(e.NodeIDs, *p.NodeID)
-				e.EdgeIDs = append(e.EdgeIDs, b.edge("DECIDED_BY", "decision:"+id, *p.NodeID, a, deal, at, []string{ev[field]}, []string{eid}, models.Validity{TemporalBasis: "event"}))
+				edgeType := "REQUESTED_BY"
+				if field == "diputuskan_oleh" {
+					edgeType = "DECIDED_BY"
+				}
+				e.EdgeIDs = append(e.EdgeIDs, b.edge(edgeType, "decision:"+id, *p.NodeID, a, deal, at, []string{ev[field]}, []string{eid}, models.Validity{TemporalBasis: "event"}))
 			}
 		}
 		for _, v := range ev {
@@ -103,7 +111,18 @@ func (b *builder) business() {
 			}
 			anchor := col
 			ev[anchor] = b.evidence(file, row, map[string]string{col: id}, id, anchor, a, "", at, "event").EvidenceID
-			b.node(typ+":"+id, typ, id, a, at, known(label, "snapshot", ev[anchor]), []string{ev[anchor]})
+			labelField := anchor
+			labelBasis := "snapshot"
+			if typ == "ticket" || typ == "bug" {
+				labelField = "judul"
+			}
+			if typ == "feature" {
+				labelField = "nama"
+			}
+			if typ == "release" {
+				labelBasis = "event"
+			}
+			b.node(typ+":"+id, typ, id, a, at, known(label, labelBasis, ev[labelField]), []string{ev[anchor], ev[labelField]})
 			if file == "features.csv" {
 				continue
 			}

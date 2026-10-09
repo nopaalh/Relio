@@ -124,21 +124,7 @@ func (b *builder) emailParticipant(raw, account, ev string, at models.Date) mode
 		p.EvidenceIDs = []string{ev}
 		p.MatchMethod = "raw_email_no_historical_alias"
 	}
-	for _, file := range []string{"crm_contacts.csv", "employees.csv"} {
-		for _, row := range b.src.rows[file] {
-			if row["email"] == raw && raw != "" {
-				col, typ := "contact_id", "contact:"
-				if file == "employees.csv" {
-					col = "employee_id"
-					typ = "employee:"
-				}
-				id := typ + row[col]
-				p.CandidateNodeIDs = append(p.CandidateNodeIDs, id)
-				p.VerificationState = "ambiguous"
-				b.node(id, "person", row[col], account, at, known(row[col], "event", ev), []string{ev})
-			}
-		}
-	}
+	// Current profile emails cannot establish a dated or foreign-account alias.
 	return p
 }
 func (b *builder) buildCore() {
@@ -223,6 +209,10 @@ func (b *builder) buildCore() {
 			e.ScopeKind = "company"
 			e.AccountIDs = []string{}
 		}
+		b.node(eid, "event", eid, a, at, e.Summary, e.EvidenceIDs)
+		e.NodeIDs = append(e.NodeIDs, eid)
+		e.EdgeIDs = append(e.EdgeIDs, b.edge("CONCERNS_PERSON", eid, "contact:"+row["contact_id"], a, "", at, []string{evs[0]}, []string{eid}, models.Validity{TemporalBasis: "event"}))
+		e.EdgeIDs = append(e.EdgeIDs, b.edge("EMPLOYMENT_CONTEXT", eid, org, a, "", at, evs, []string{eid}, models.Validity{TemporalBasis: "event"}))
 		b.put("events", eid, a, "", at, e)
 	}
 }
@@ -360,6 +350,7 @@ func build(s sources) (repository.FullArtifact, error) {
 	b.interactions()
 	b.business()
 	b.usage()
+	b.actions()
 	records, err := b.finish()
 	if err != nil {
 		return repository.FullArtifact{}, err
@@ -367,6 +358,12 @@ func build(s sources) (repository.FullArtifact, error) {
 	version := "full:" + repository.FullDigestJSON([]any{s.hashes, repository.FullSchemaVersion, "mapping-v1", "relio-actions-v1", "relio-relevance-v1"})
 	a := repository.FullArtifact{Manifest: repository.FullManifest{SchemaVersion: repository.FullSchemaVersion, DatasetVersion: version, Sources: s.hashes, SourceCounts: s.counts, DealIDs: []string{}, AccountIDs: []string{}}, Records: records, SourcePartitions: b.sourceParts}
 	for _, x := range s.rows["crm_deals.csv"] {
+		if a.Manifest.DealAccountIDs == nil {
+			a.Manifest.DealAccountIDs = map[string]string{}
+			a.Manifest.DealCreatedAt = map[string]models.Date{}
+		}
+		a.Manifest.DealAccountIDs[x["deal_id"]] = x["account_id"]
+		a.Manifest.DealCreatedAt[x["deal_id"]] = date(x["dibuat"])
 		a.Manifest.DealIDs = append(a.Manifest.DealIDs, x["deal_id"])
 	}
 	for _, x := range s.rows["crm_accounts.csv"] {

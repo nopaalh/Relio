@@ -85,7 +85,11 @@ func NewNeo4jFullContextRepository(ctx context.Context, c Neo4jConfig) (*Neo4jFu
 			if q.Company {
 				scopes = append(scopes, "company")
 			}
-			params := map[string]any{"version": q.Version, "scopes": scopes, "kinds": q.Kinds, "as_of": string(q.AsOf), "deals": q.Deals, "analogs": q.Analogs}
+			lookupKind := q.LookupKind
+			if lookupKind == "" {
+				lookupKind = "evidence"
+			}
+			params := map[string]any{"version": q.Version, "scopes": scopes, "kinds": q.Kinds, "as_of": string(q.AsOf), "deals": q.Deals, "analogs": q.Analogs, "lookup_id": q.LookupID, "lookup_kind": lookupKind}
 			res, err := tx.Run(ctx, fullRecordsQuery, params)
 			if err != nil {
 				return nil, err
@@ -128,6 +132,25 @@ func NewNeo4jFullContextRepository(ctx context.Context, c Neo4jConfig) (*Neo4jFu
 			}
 			if err := verifyFullSelection(m, out.Partitions, out.Records); err != nil {
 				return nil, err
+			}
+			if strings.HasPrefix(q.LookupID, "ev:usage:") {
+				sourceID := "usage-source:" + strings.TrimPrefix(q.LookupID, "ev:usage:")
+				res, e := tx.Run(ctx, fullSourceQuery, map[string]any{"version": q.Version, "id": sourceID, "accounts": q.Accounts, "as_of": string(q.AsOf)})
+				if e != nil {
+					return nil, e
+				}
+				rows, e := res.Collect(ctx)
+				if e != nil {
+					return nil, e
+				}
+				for _, row := range rows {
+					blob, _ := row.AsMap()["payload"].(string)
+					var p FullSourcePartition
+					if json.Unmarshal([]byte(blob), &p) != nil || p.ID != sourceID || p.Hash != FullSourceDigest(p) || m.PartitionRoots["source:"+p.ID] != p.Hash {
+						return nil, &RepositoryError{Code: DataNotReady}
+					}
+					out.SourcePartitions = append(out.SourcePartitions, p)
+				}
 			}
 			return out, nil
 		})

@@ -62,6 +62,12 @@ func checkBudget(existingNodes, existingLinks, newNodes, newLinks, nodeBudget, l
 	}
 	return nil
 }
+func remainingNamespaceSize(expectedNodes, expectedLinks, currentNodes, currentLinks int64) (int64, int64, error) {
+	if currentNodes < 0 || currentLinks < 0 || currentNodes > expectedNodes || currentLinks > expectedLinks {
+		return 0, 0, errors.New("unexpected namespace coverage")
+	}
+	return expectedNodes - currentNodes, expectedLinks - currentLinks, nil
+}
 func safeError(stage string, err error) error {
 	var e *neo4j.Neo4jError
 	if errors.As(err, &e) {
@@ -166,8 +172,28 @@ func run() error {
 		if existing[0].AsMap()["hash"] != a.Manifest.ManifestHash {
 			return errors.New("namespace manifest differs; no overwrite allowed")
 		}
-		additionalNodes = 0
-		additionalLinks = 0
+		res, e := session.Run(ctx, `MATCH (n {version:$version}) RETURN count(n) AS count`, map[string]any{"version": a.Manifest.DatasetVersion})
+		if e != nil {
+			return safeError("namespace capacity", e)
+		}
+		row, e := res.Single(ctx)
+		if e != nil {
+			return safeError("namespace capacity", e)
+		}
+		namespaceNodes, _ := row.AsMap()["count"].(int64)
+		res, e = session.Run(ctx, `MATCH (a {version:$version})-[r]->(b {version:$version}) RETURN count(r) AS count`, map[string]any{"version": a.Manifest.DatasetVersion})
+		if e != nil {
+			return safeError("namespace links", e)
+		}
+		row, e = res.Single(ctx)
+		if e != nil {
+			return safeError("namespace links", e)
+		}
+		namespaceLinks, _ := row.AsMap()["count"].(int64)
+		additionalNodes, additionalLinks, e = remainingNamespaceSize(newNodes, links, namespaceNodes, namespaceLinks)
+		if e != nil {
+			return e
+		}
 	}
 	if err := checkBudget(nodes, currentLinks, additionalNodes, additionalLinks, *nodeBudget, *linkBudget); err != nil {
 		return err

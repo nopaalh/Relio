@@ -12,15 +12,17 @@ import (
 const FullSchemaVersion = "relio-neo4j-full-v1"
 
 type FullManifest struct {
-	SchemaVersion  string            `json:"schema_version"`
-	DatasetVersion string            `json:"dataset_version"`
-	ManifestHash   string            `json:"manifest_hash"`
-	Sources        map[string]string `json:"sources"`
-	SourceCounts   map[string]int    `json:"source_counts"`
-	Counts         map[string]int    `json:"counts"`
-	DealIDs        []string          `json:"deal_ids"`
-	AccountIDs     []string          `json:"account_ids"`
-	PartitionRoots map[string]string `json:"partition_roots"`
+	DealAccountIDs map[string]string      `json:"deal_account_ids"`
+	DealCreatedAt  map[string]models.Date `json:"deal_created_at"`
+	SchemaVersion  string                 `json:"schema_version"`
+	DatasetVersion string                 `json:"dataset_version"`
+	ManifestHash   string                 `json:"manifest_hash"`
+	Sources        map[string]string      `json:"sources"`
+	SourceCounts   map[string]int         `json:"source_counts"`
+	Counts         map[string]int         `json:"counts"`
+	DealIDs        []string               `json:"deal_ids"`
+	AccountIDs     []string               `json:"account_ids"`
+	PartitionRoots map[string]string      `json:"partition_roots"`
 }
 type FullRecord struct {
 	Kind          string          `json:"kind"`
