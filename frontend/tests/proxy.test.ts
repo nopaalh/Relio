@@ -9,7 +9,7 @@ test("DATA UJI: default Go proxy forwards encoded path/query and truthful status
     calls++;
     assert.equal(String(input), DEFAULT_API_URL + "/api/deals/DATA%20UJI%2Fid/timeline?as_of=2026-09-01&limit=50&cursor=DATA%2BUJI&as_of=2026-09-01");
     assert.equal(init?.method, "GET"); assert.equal(init?.cache, "no-store"); assert.equal(init?.redirect, "manual");
-    assert.equal(init?.credentials, "omit"); assert.ok(init?.signal); assert.ok(PROXY_TIMEOUT_MS <= 45_000);
+    assert.equal(init?.credentials, "omit"); assert.ok(init?.signal); assert.equal(PROXY_TIMEOUT_MS, 130_000);
     assert.equal(new Headers(init?.headers).get("Authorization"), null); assert.equal(new Headers(init?.headers).get("Cookie"), null);
     return new Response("DATA UJI plain upstream failure", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8", "Set-Cookie": "DATA-UJI-only" } });
   };

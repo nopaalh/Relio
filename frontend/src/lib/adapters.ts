@@ -179,9 +179,14 @@ export function toEvidence(result: EvidenceResult, date: string, expected?: Snap
 export function applyAssessment(deal: Deal, assessment: ContextBundle["assessment"]): Deal {
   if (!assessment) return deal;
   const readiness = assessment.readiness_100 ?? null;
-  if (readiness !== null && (!Number.isFinite(readiness) || readiness < 0 || readiness > 100)) throw new Error("Invalid backend readiness score.");
+  const scores = [readiness, assessment.attractiveness_100 ?? null, assessment.urgency_100 ?? null, assessment.coverage ?? null];
+  if (scores.some(value => value !== null && (!Number.isFinite(value) || value < 0 || value > 100))) throw new Error("Invalid backend assessment score.");
+  const dimensions = assessment.coverage_dimensions?.map(d => ({ key: d.key, label: d.key.replaceAll("_", " "), present: d.present, evidence_ids: d.evidence_ids })) ?? deal.coverage_dimensions;
   return { ...deal, readiness, readiness_label: readiness === null ? null : assessment.readiness_label ?? null,
-    assessment_status: assessment.status, unknowns: readiness === null ? deal.unknowns : deal.unknowns?.filter(u => u.path !== "readiness") };
+    attractiveness: assessment.attractiveness_100 ?? null, urgency: assessment.urgency_100 ?? null,
+    coverage: assessment.coverage ?? null, coverage_dimensions: dimensions,
+    blocker: assessment.blocker ?? null, blocker_evidence_ids: assessment.blocker_evidence_ids ?? [],
+    assessment_status: assessment.status, unknowns: deal.unknowns?.filter(u => !["readiness", "attractiveness", "urgency", "coverage"].includes(u.path)) };
 }
 
 export function assertDealResult(result: DealResult, id: string, date: string): void {

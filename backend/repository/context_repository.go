@@ -21,6 +21,9 @@ type TimelineRepository interface {
 type EvidenceRepository interface {
 	ReadEvidence(ctx context.Context, evidenceID string, snapshot models.SnapshotContext) (models.EvidenceResult, error)
 }
+type EvidenceBatchRepository interface {
+	ReadEvidenceBatch(ctx context.Context, evidenceIDs []string, snapshot models.SnapshotContext) ([]models.EvidenceResult, error)
+}
 type ActionRepository interface {
 	ReadActionCandidates(ctx context.Context, dealID string, snapshot models.SnapshotContext, options models.CandidateOptions) (models.ActionCandidatesResult, error)
 	// Resolve every selected ID against the same scope/snapshot/relevance version.

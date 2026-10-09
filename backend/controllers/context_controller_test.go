@@ -279,6 +279,12 @@ func TestContextControllerCanonicalEnvelopes(t *testing.T) {
 	}
 }
 
+func TestContextQueryTimeoutAllowsSlowGraphAndJEVAssessment(t *testing.T) {
+	if contextQueryTimeout != 120*time.Second {
+		t.Fatalf("context query timeout = %s, want 120s for slow Aura + JEV assessment", contextQueryTimeout)
+	}
+}
+
 func TestContextControllerOptions(t *testing.T) {
 	cursor, focus := "DATA-UJI-CURSOR", "TEST-EVENT"
 	cases := []struct {
@@ -521,7 +527,7 @@ func TestContextControllerAssessmentForwarding(t *testing.T) {
 				}
 				stub := &contextAssessmentStub{contextHTTPStub: &contextHTTPStub{onRead: func(ctx context.Context) error {
 					deadline, ok := ctx.Deadline()
-					if !ok || time.Until(deadline) <= 0 || time.Until(deadline) > 15*time.Second || ctx.Value(requestKey{}) != "DATA-UJI" {
+					if !ok || time.Until(deadline) <= 0 || time.Until(deadline) > contextQueryTimeout || ctx.Value(requestKey{}) != "DATA-UJI" {
 						t.Fatalf("assessor context/deadline not forwarded: %v", ctx)
 					}
 					return nil

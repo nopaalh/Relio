@@ -108,6 +108,10 @@ export type Assessment = {
   meta?: SnapshotMeta; status: string; rubric_version: string; explanation: string; unknowns: string[];
   readiness_100?: number | null; readiness_label?: string | null; jev_raw_score?: number | null;
   jev_confidence?: number | null; evidence_ids?: string[]; provider_model?: string | null;
+  attractiveness_100?: number | null; acv_relative_100?: number | null; acv_denominator_idr?: number | null;
+  strategic_outlets_100?: number | null; urgency_100?: number | null; blocker?: string | null;
+  blocker_evidence_ids?: string[]; coverage?: number | null;
+  coverage_dimensions?: { key: string; present: boolean; evidence_ids: string[] }[];
 };
 export type TimelineView = {
   events: TimelineEvent[]; navigation?: { previous: string | null; next: string | null };

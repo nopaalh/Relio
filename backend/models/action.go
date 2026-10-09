@@ -75,3 +75,27 @@ type SelectedActionsResult struct {
 	Items                []ActionCandidate `json:"items"`
 	Evidence             []Evidence        `json:"evidence"`
 }
+
+// ActionComparisonResult contains model assessments, not approvals or source facts.
+type ActionComparisonResult struct {
+	Meta             Meta                   `json:"meta"`
+	DealID           string                 `json:"deal_id"`
+	AsOf             Date                   `json:"as_of"`
+	ComparisonType   string                 `json:"comparison_type"`
+	AssessmentStatus string                 `json:"assessment_status"`
+	RubricVersion    string                 `json:"rubric_version"`
+	Items            []ActionComparisonItem `json:"items"`
+	Warning          string                 `json:"warning"`
+}
+type ActionComparisonItem struct {
+	ActionID            string   `json:"action_id"`
+	SuitabilityScore100 *int     `json:"suitability_score_100"`
+	JEVRawScore         *float64 `json:"jev_raw_score"`
+	JEVConfidence       *float64 `json:"jev_confidence"`
+	JEVChoicePreference *float64 `json:"jev_choice_preference"`
+	Rank                *int     `json:"rank"`
+	EvidenceIDs         []string `json:"evidence_ids"`
+	PrecedentIDs        []string `json:"precedent_ids"`
+	PolicyFlags         []string `json:"policy_flags"`
+	Unknowns            []string `json:"unknowns"`
+}

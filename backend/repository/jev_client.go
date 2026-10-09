@@ -20,7 +20,7 @@ const (
 	// JEVDefaultEndpoint is the documented production evaluation endpoint.
 	JEVDefaultEndpoint = "https://api.typesafe.ai/v1/systemone"
 	// JEVDefaultTimeout bounds one call, including reading the body.
-	JEVDefaultTimeout = 30 * time.Second
+	JEVDefaultTimeout = 90 * time.Second
 	// JEVDefaultMaxResponseBytes bounds the success body that is decoded.
 	JEVDefaultMaxResponseBytes int64 = 1 << 20
 	// jevMaxErrorDrainBytes bounds how much of an error body is discarded so

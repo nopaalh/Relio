@@ -299,7 +299,44 @@ func (r *Neo4jFullContextRepository) ReadEvidence(ctx context.Context, id string
 	return models.EvidenceResult{}, &RepositoryError{Code: NotFound}
 }
 
+// ReadEvidenceBatch projects multiple evidence IDs from one scoped/as-of load.
+// Missing IDs use the single-item path to preserve access/not-visible errors.
+func (r *Neo4jFullContextRepository) ReadEvidenceBatch(ctx context.Context, ids []string, s models.SnapshotContext) ([]models.EvidenceResult, error) {
+	if len(ids) == 0 {
+		return []models.EvidenceResult{}, nil
+	}
+	seen := make(map[string]bool, len(ids))
+	for _, id := range ids {
+		if id == "" || seen[id] {
+			return nil, &RepositoryError{Code: InvalidQuery}
+		}
+		seen[id] = true
+	}
+	q := fullQueryFor(s, "evidence")
+	_, view, err := r.loadFull(ctx, s, q)
+	if err != nil {
+		return nil, err
+	}
+	byID := make(map[string]models.Evidence, len(view.Evidence))
+	for _, evidence := range view.Evidence {
+		byID[evidence.EvidenceID] = evidence
+	}
+	results := make([]models.EvidenceResult, len(ids))
+	for i, id := range ids {
+		if evidence, ok := byID[id]; ok {
+			results[i] = models.EvidenceResult{Meta: view.Meta, Evidence: evidence}
+			continue
+		}
+		results[i], err = r.ReadEvidence(ctx, id, s)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return results, nil
+}
+
 var _ DealFactsRepository = (*Neo4jFullContextRepository)(nil)
 var _ GraphRepository = (*Neo4jFullContextRepository)(nil)
 var _ TimelineRepository = (*Neo4jFullContextRepository)(nil)
 var _ EvidenceRepository = (*Neo4jFullContextRepository)(nil)
+var _ EvidenceBatchRepository = (*Neo4jFullContextRepository)(nil)

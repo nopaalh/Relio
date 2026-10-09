@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	contextQueryTimeout = 15 * time.Second
+	contextQueryTimeout = 120 * time.Second
 	contextCursorLimit  = 4096
 	contextIDLimit      = 256
 	contextBodyLimit    = 16 << 10
@@ -202,7 +202,7 @@ func (c *ContextController) Compare(w http.ResponseWriter, r *http.Request) {
 		seen[id] = true
 	}
 	reader, ok := c.reader.(interface {
-		CompareActions(context.Context, string, models.SnapshotContext, []string, string) (models.SelectedActionsResult, error)
+		CompareActions(context.Context, string, models.SnapshotContext, []string, string) (models.ActionComparisonResult, error)
 	})
 	if !ok {
 		c.unavailable(w, r, asOf, r.PathValue("deal_id"), "comparison_unavailable", "action comparison is not available; no scores or rankings were produced")

@@ -1,5 +1,5 @@
 export const DEFAULT_API_URL = "http://127.0.0.1:8080";
-export const PROXY_TIMEOUT_MS = 15_000;
+export const PROXY_TIMEOUT_MS = 130_000;
 
 const error = (status: number, code: string, message: string) => Response.json({ code, message }, {
   status, headers: { "Cache-Control": "no-store" },
