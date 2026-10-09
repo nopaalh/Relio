@@ -1,9 +1,17 @@
 import type { GraphNode, GraphEdge, TimelineEvent } from './contracts';
 export type GraphSelection={kind:'node'|'edge';id:string};
+export const nodeEventIds=(node:GraphNode):string[]=>node.event_ids??(node.event_id?[node.event_id]:[]);
+export function eventNode(eventId:string,nodes:GraphNode[]){
+  return nodes.find(n=>n.type==='Event'&&(n.entity_id===eventId||nodeEventIds(n).includes(eventId)||n.id===eventId));
+}
+export function linkedEvent(node:GraphNode,events:TimelineEvent[],preferred?:string|null){
+  const linked=events.filter(e=>nodeEventIds(node).includes(e.event_id));
+  return linked.find(e=>e.event_id===preferred)??linked.at(-1);
+}
 export const entityDescriptions:Record<string,string>={
 Deal:'The sales opportunity under review. Stage, value, and assessments depend on the active date and available evidence.',
 Account:'The organization providing relationship context. Connections to deals and events follow the available sources.',
-Person:'The sender or recorder identified in a source. Historical employment and decision authority require their own evidence.',
+Person:'A participant reference from a source. Identity, historical employment and decision authority require their own evidence.',
 Event:'A dated event projected from a source: an interaction, request, or decision related to this deal.',
 Interaction:'The original communication record, such as an email or meeting note. Source text is distinct from its interpretation.',
 Evidence:'A supporting record you can inspect. A precedent from another case does not approve this deal.',
@@ -13,7 +21,7 @@ Contract:'Sourced contractual or billing terms. A contract does not automaticall
 UsageAggregate:'Sourced usage totals. Usage from a comparison customer does not become usage by this prospect.'};
 export const relationDescriptions:Record<string,string>={
 FOR_ACCOUNT:'This deal is recorded for this account.',
-HAS_EVENT:'This event is connected through the account in its source; the email does not directly attribute a deal_id.',
+HAS_EVENT:'A source-supported event relationship. Account context does not by itself establish direct deal attribution.',
 EXTRACTED_FROM:'This event is projected from this interaction record.',
 SUPPORTED_BY:'This entity or claim has this supporting source record.',
 SENT_OR_RECORDED:'This person or address sent or recorded the interaction in the source.',
@@ -35,7 +43,7 @@ export type SolarSystem={id:string;date:string|null;x:number;y:number;size:numbe
 export function solarSystemLayout(nodes:GraphNode[],events:TimelineEvent[]){
   const eventDates=new Map(events.map(event=>[event.event_id,event.date]));
   const groups=new Map<string,GraphNode[]>();
-  for(const node of nodes){const date=node.event_id?eventDates.get(node.event_id):undefined,key=date??'shared';groups.set(key,[...(groups.get(key)??[]),node]);}
+  for(const node of nodes){const dates=[...new Set(nodeEventIds(node).flatMap(id=>eventDates.has(id)?[eventDates.get(id)!]:[]))];const key=dates.length===1?dates[0]:'shared';groups.set(key,[...(groups.get(key)??[]),node]);}
   const keys=[...groups.keys()].sort((a,b)=>a==='shared'?-1:b==='shared'?1:a.localeCompare(b));
   const size=720+Math.max(0,Math.ceil((Math.max(1,...[...groups.values()].map(g=>g.length))-1)/6)-1)*400;
   const systems:SolarSystem[]=[],positions=new Map<string,{x:number;y:number}>();

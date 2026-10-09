@@ -31,7 +31,7 @@ function actorOf(row:Row,data:Awaited<ReturnType<typeof dataset>>):string {
   const contact=data.contacts.find(c=>c.email===row.dari);
   return contact?.nama??row.dari??"Unknown actor";
 }
-function events(account:string,date:string,data:Awaited<ReturnType<typeof dataset>>):TimelineEvent[] {
+function events(account:string,date:string,data:Awaited<ReturnType<typeof dataset>>):(TimelineEvent & {interaction_id:string})[] {
   return data.interactions.filter(i=>i.account_id===account&&visibleAt(i.tanggal,date)).map(i=>({
     event_id:"EV-"+i.interaction_id,interaction_id:i.interaction_id,date:i.tanggal,title:i.subjek,
     type:eventTypes[i.interaction_id]??(i.tipe==="catatan_meeting"?"MEETING":"OTHER"),
@@ -80,7 +80,7 @@ function buildDeal(row:Row,date:string,data:Awaited<ReturnType<typeof dataset>>)
     urgency:null,readiness:null,readiness_label:null,coverage:dimensions.filter(d=>d.present).length,coverage_dimensions:dimensions,
     blocker:request&&row.account_id==="P04"?"A customer reference was requested before signing; completion is unknown.":null,
     blocker_evidence_ids:request&&row.account_id==="P04"?request.evidence_ids:[],action_count:candidates(date,data).length,
-    temporal_scope:"snapshot_only",assessment_status:"jev_unavailable"
+    temporal_scope:"snapshot_only",assessment_status:"jev_unavailable",record_evidence_ids:atSnapshot?["EVC-"+row.deal_id]:[]
   };
 }
 export async function listDeals(date:string) {
