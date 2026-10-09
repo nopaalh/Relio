@@ -1,0 +1,3 @@
+# Generated fixed-source data stays local; publish reproducible tooling instead.
+artifact.json
+manifest.json
