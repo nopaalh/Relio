@@ -1,0 +1,2 @@
+*.json text eol=lf
+*.cypher text eol=lf
