@@ -1,0 +1,10 @@
+# Hackathon PENS 2026 briefs, dataset, and generated notes
+/HACKATHON PENS 2026/
+
+# Internal Relio planning documents
+/Relio_PRD*.md
+/Relio_Technical_Build_Spec_Agent_Ready.md
+
+# Local secrets and Go build artifacts
+**/.env
+/backend/bin/
