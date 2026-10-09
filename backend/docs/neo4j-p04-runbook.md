@@ -1,6 +1,6 @@
 # Neo4j Aura — graph nyata slice P04
 
-Status: seed source-grounded dan adapter lokal; bukan acceptance Aura sampai live test PASS. Shared contract masih candidate untuk O2. Dataset FIX, database statis, preparation manual sekali; tidak ada pipeline/CSV startup/request.
+Status: seed P04 telah dimuat ke Aura dan acceptance read-only PASS pada 2026-10-10. Coverage tetap DL-004/P04 saja; HTTP wiring belum dilakukan. Shared contract masih candidate untuk O2. Dataset FIX, database statis, preparation sekali; tidak ada pipeline/CSV startup/request.
 
 ## Yang tersedia
 
@@ -26,6 +26,18 @@ Manifest `ready:false` adalah artefak persiapan, bukan published DB readiness. D
 `p04:8a7eecd15f97a7ca7fd770bbb917a6efb03ea004a9263e2af2634aff660b9c7a`
 
 ## 2. Load sekali ke target Aura yang eksplisit
+
+Cara otomatis (dari `backend/`, konfigurasi di `.env` lokal yang di-ignore):
+
+```powershell
+go run ./tools/seedneo4j          # dry-run lokal, tanpa network/write
+go run ./tools/seedneo4j -inspect # preflight read-only target DB dan manifest
+go run ./tools/seedneo4j -apply   # constraints IF NOT EXISTS + seed satu transaksi
+```
+
+Loader memakai driver Go yang sudah terpasang, membaca `.env` tanpa mengeksekusinya, dan tidak mencetak password. Target database harus terlihat dan dataset version/hash harus cocok. Parser hanya menerima format artefak yang disiapkan: satu statement lengkap per baris (semicolon di dalam string tidak dipecah). Seed di-commit hanya jika statement terakhir menghasilkan `ready:true`, `actual:46`, `links:8`; kegagalan seed membatalkan transaksi seed. Constraints dijalankan terpisah sehingga dapat tetap ada jika transaksi seed gagal. Tidak ada DELETE atau overwrite payload. Tool tidak dipanggil oleh aplikasi backend.
+
+Alternatif manual:
 
 Gunakan instance/database khusus Relio yang dipilih tim. Login Aura Query memakai credential preparation aman, bukan credential/browser frontend. Belum ada instance/secret yang diasumsikan atau dibuat oleh adapter.
 
@@ -99,4 +111,4 @@ Final lokal: 63 top-level tests + 72 subtests PASS, 0 failure; go vet dan full r
 
 Satu review fresh-context menemukan tiga important issues; semuanya diperbaiki dalam satu test-first pass: seed ready membandingkan actual payload/adjacency, runtime decoder memeriksa sealed manifest record registry + native DL-004/P04 anchor, dan bounded focused graph mempertahankan event fokus. Test fokus/readiness gate diamati FAIL sebelum fix; registry test RED untuk decoder/registry yang belum ada lalu GREEN menolak payload+hash replacement. Full suite/vet/race dijalankan ulang. Cypher readiness-gate test adalah static statement check, bukan execution acceptance; seluruh file Cypher masih harus dijalankan dan live tests diulang pada Aura.
 
-Instance Aura telah dikonfirmasi ada oleh user; konfigurasi lokal akan disiapkan. Aura belum dihubungi, schema/seed belum dieksekusi dan live test belum PASS. HTTP wiring/deployment/JEV/Copilot bukan deliverable tahap ini. Belum commit/push/merge.
+Update live 2026-10-10: target instance/database dari `.env` diverifikasi dengan SHOW DATABASES; dua constraints dan 49 statement seed dieksekusi loader sekali jalan. Transaksi seed committed dengan `ready:true`, `actual:46`, `links:8`. TestNeo4jP04Live PASS untuk snapshot 2026-09-01, 2026-09-22, 2026-10-01, termasuk query deal/graph/timeline/evidence, no-future-leakage dan access-denied. Credential tidak dicetak atau dimasukkan Git. HTTP wiring/deployment/JEV/Copilot dan coverage seluruh dataset belum dilakukan. Adapter/seed sebelumnya sudah dipush; loader dan pembaruan runbook masih perubahan lokal sampai dipublikasikan terpisah.
