@@ -4,10 +4,11 @@ Go backend dengan struktur package langsung di bawah `backend/`.
 
 ## Dokumentasi pengembangan
 
-- [Arsitektur backend berdasarkan PRD v0.4](docs/architecture.md): keputusan yang sudah ditetapkan, kondisi implementasi saat ini, komponen target, alur data/graph, API, dan rencana validasi.
-- [Pertanyaan terbuka dan rekomendasi](docs/open-questions.md): keputusan yang belum final beserta saran, alasan, risiko, dan tahap ketika keputusan dibutuhkan.
+- [Arsitektur backend berdasarkan PRD Final MVP v1.0](docs/architecture.md): keputusan produk, kondisi kode, context graph, assessment, action comparison, API, keamanan, dan validasi.
+- [Pertanyaan terbuka dan rekomendasi v1](docs/open-questions.md): bagian yang telah dipertegas PRD versus keputusan teknis yang masih terbuka, beserta alasan, risiko, dan owner usulan.
+- [Rencana pengembangan dua orang](docs/development-plan.md): O1 fokus context graph/data, O2 fokus aplikasi backend; backlog, batas file, kontrak handoff, milestone, dan kriteria selesai.
 
-Dokumen membedakan kebutuhan PRD, kode yang sudah ada, dan usulan teknis. Database, provider login, serta detail integrasi model belum dianggap sebagai keputusan final.
+Dokumen membedakan kebutuhan PRD, kode yang sudah ada, default teknologi bersyarat, dan usulan teknis. Database/framework aktual, provider login, serta verifikasi live API model belum dianggap selesai. Ownership frontend/UI E2E tetap perlu diputuskan; API backend saja bukan MVP lengkap.
 
 ## Struktur package
 
@@ -19,7 +20,8 @@ backend/
 ├── controllers/
 ├── services/
 ├── repository/
-└── models/
+├── models/
+└── docs/
 ```
 
 ## Tanggung jawab package
