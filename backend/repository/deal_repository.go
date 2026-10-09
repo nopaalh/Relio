@@ -2,9 +2,15 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/nopaalh/Relio/backend/models"
+)
+
+var (
+	ErrDealNotFound        = errors.New("deal not found")
+	ErrDealDataUnavailable = errors.New("deal database adapter is not configured")
 )
 
 type DealRepository interface {
