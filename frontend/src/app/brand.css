@@ -1,0 +1,45 @@
+/* Relio Universe GSM v3.0 -- Ribbon Flow R + Deal Universe */
+:root, [data-theme="light"] {
+  --relio-blue-50: #F1EDFF; --relio-blue-100: #E7DEFF;
+  --relio-blue-300: #9AA8FF; --relio-blue-500: #5269E8;
+  --relio-blue-600: #4055CD; --relio-blue-700: #3042A5;
+  --relio-primary: #7052E8; --relio-primary-hover: #5D3FD4;
+  --relio-primary-foreground: #FFFFFF;
+  --relio-bg: #F7F8FE; --relio-surface: #FFFFFF;
+  --relio-fg: #0B1220; --relio-muted: #526175;
+  --relio-border: #E2E8F0; --relio-sidebar: #090D1D;
+  --relio-sidebar-surface: #152033;
+  --relio-evidence: #087C72; --relio-evidence-mark: #169D91;
+  --relio-warning: #9B651F; --relio-warning-bg: #FFF4DF;
+  --relio-danger: #B42335; --relio-danger-bg: #FCEDEF;
+  --relio-unknown: #526175;
+  --relio-radius-sm: 8px; --relio-radius-md: 12px; --relio-radius-lg: 16px;
+  --relio-font-display: "Manrope", "Inter", sans-serif;
+  --relio-font-body: "Inter", system-ui, sans-serif;
+  --relio-font-mono: "JetBrains Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  --relio-primary: #A78BFA; --relio-primary-hover: #C4B5FD;
+  --relio-primary-foreground: #0B1220;
+  --relio-bg: #0B1026; --relio-surface: #151B36;
+  --relio-fg: #F5F3FF; --relio-muted: #BDC7E6;
+  --relio-border: #354062; --relio-sidebar: #090D1D;
+  --relio-evidence: #62DDC4; --relio-warning: #F2BF73;
+  --relio-danger: #FF8B9B; --relio-unknown: #B8C6DB;
+  color-scheme: dark;
+}
+.relio-graph-edge--observed { stroke: var(--relio-evidence); stroke-dasharray: none; }
+.relio-graph-edge--inferred { stroke: var(--relio-primary); stroke-dasharray: 7 5; }
+.relio-graph-edge--hypothesis { stroke: var(--relio-warning); stroke-dasharray: 2 5; }
+.relio-tabular { font-variant-numeric: tabular-nums; }
+.relio-focus-visible:focus-visible { outline: 3px solid var(--relio-primary); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+:root {
+ --relio-nebula:#7052E8; --relio-nebula-hover:#5D3FD4; --relio-nebula-pressed:#492DB0; --relio-nebula-soft:#F1EDFF; --relio-signal-blue:#5269E8;
+ --relio-space:#0B1026; --relio-space-surface:#151B36; --relio-space-text:#F5F3FF; --relio-space-muted:#BDC7E6;
+ --relio-space-border:#354062; --relio-orbit-violet:#A78BFA; --relio-nova-cyan:#70DDF0; --relio-rose-nebula:#EAA0D7;
+ --relio-gradient-universe:linear-gradient(120deg,#7052E8 0%,#5269E8 58%,#087C72 100%);
+ --relio-gradient-nebula:radial-gradient(ellipse at 18% 15%,#6B39B72E,transparent 55%),radial-gradient(ellipse at 85% 70%,#205CA729,transparent 52%);
+}

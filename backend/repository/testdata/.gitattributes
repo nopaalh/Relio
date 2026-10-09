@@ -1,2 +1,0 @@
-# Raw-byte checksum fixture must survive Windows autocrlf checkouts unchanged.
-contract_sources.json text eol=lf
