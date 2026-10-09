@@ -1,0 +1,34 @@
+{
+  "TEST-SRC-ACCOUNT": {
+    "date": "2026-09-01",
+    "text": "DATA UJI: akun TEST-ACCOUNT."
+  },
+  "TEST-SRC-SALES": {
+    "date": "2026-09-01",
+    "text": "DATA UJI: TEST-SALES adalah aktor Sales."
+  },
+  "TEST-SRC-VP": {
+    "date": "2026-09-01",
+    "text": "DATA UJI: TEST-VP adalah aktor VP Sales."
+  },
+  "TEST-SRC-REQ10": {
+    "date": "2026-09-10",
+    "text": "DATA UJI: TEST-SALES meminta diskon 10% untuk TEST-ACCOUNT; belum ada approval."
+  },
+  "TEST-SRC-APP10": {
+    "date": "2026-09-10",
+    "text": "DATA UJI: TEST-VP menyetujui permintaan TEST-OCC-REQ10 sebesar 10%, bukan permintaan lain."
+  },
+  "TEST-SRC-REQ14": {
+    "date": "2026-09-11",
+    "text": "DATA UJI: TEST-SALES mengajukan permintaan baru 14% untuk TEST-ACCOUNT; approval, consent, dan outcome belum diketahui."
+  },
+  "TEST-SRC-AMBIG": {
+    "date": "2026-09-01",
+    "text": "DATA UJI: identitas ambigu, kandidat TEST-NODE-A dan TEST-NODE-B; tidak ada identitas dipilih."
+  },
+  "TEST-SRC-ZERO": {
+    "date": "2026-09-01",
+    "text": "DATA UJI: nilai pengujian yang diketahui adalah 0; bukan ACV dataset kompetisi."
+  }
+}
