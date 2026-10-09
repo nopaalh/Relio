@@ -4,7 +4,7 @@ import { ReactFlow, ReactFlowProvider, ViewportPortal, getViewportForBounds, Bas
 import "@xyflow/react/dist/style.css";
 import { Network, FileText, Building2, UserRound, CalendarDays, BriefcaseBusiness, ZoomIn, ZoomOut, Maximize2, LocateFixed, List, ArrowLeft, ShieldCheck, GitBranch, Orbit, Sparkles, Search, Ellipsis } from "lucide-react";
 import type { GraphNode, GraphEdge, TimelineEvent } from "@/lib/contracts";
-import { neighborhood, orbitalLayout, solarSystemLayout, type GraphSelection } from "@/lib/universe";
+import { neighborhood, orbitalLayout, solarSystemLayout, nodeEventIds, eventNode, linkedEvent, type GraphSelection } from "@/lib/universe";
 import { display, dateDisplay } from "@/lib/display";
 const icons:Record<string,typeof Network>={Deal:BriefcaseBusiness,Account:Building2,Person:UserRound,Event:CalendarDays,Interaction:FileText,Evidence:ShieldCheck,ActionOccurrence:GitBranch,Decision:GitBranch,Contract:FileText,UsageAggregate:Network};
 type Data = { label:string;original:GraphNode;highlighted:boolean;date:string;dated:boolean };
@@ -38,7 +38,7 @@ function Canvas({nodes:original,edges:originalEdges,selectedEvent,selection,asOf
   const visible=useMemo(()=>{
     if(currentNode)return neighborhood(currentNode,original,originalEdges);
     if(allContext||!selectedEvent)return new Set(original.map(n=>n.id));
-    const eventNodes=original.filter(n=>n.event_id===selectedEvent);
+    const eventNodes=original.filter(n=>nodeEventIds(n).includes(selectedEvent));
     const senders=originalEdges.filter(e=>eventNodes.some(n=>n.id===e.target)&&e.type==="SENT_OR_RECORDED").map(e=>e.source);
     return new Set([...original.filter(n=>n.type==="Deal"||n.type==="Account").map(n=>n.id),...eventNodes.map(n=>n.id),...senders]);
   },[currentNode,allContext,selectedEvent,original,originalEdges]);
@@ -48,7 +48,10 @@ function Canvas({nodes:original,edges:originalEdges,selectedEvent,selection,asOf
   const systems=currentNode?[]:layout.systems;
   const bounds=useMemo(()=>({x:0,y:0,width:Math.max(720,...layout.systems.map(s=>s.x+s.size)),height:Math.max(720,...layout.systems.map(s=>s.y+s.size))}),[layout]);
   const radius=(node:GraphNode)=>node.type==="Deal"?58:node.type==="Account"?52:46;
-  const nodes=useMemo<PlanetNode[]>(()=>subset.map(n=>({id:n.id,type:"planet",position:positions.get(n.id)??{x:0,y:0},selected:n.id===currentNode,data:{label:display(n.label),original:n,highlighted:n.event_id===selectedEvent,date:events.find(e=>e.event_id===n.event_id)?.date??asOf,dated:Boolean(n.event_id&&events.some(e=>e.event_id===n.event_id))},ariaLabel:n.type+": "+display(n.label),draggable:false,width:170,height:200,style:{width:156,height:164}})),[subset,positions,currentNode,selectedEvent,events,asOf]);
+  const nodes=useMemo<PlanetNode[]>(()=>subset.map(n=>{
+      const refs=nodeEventIds(n),dates=[...new Set(events.filter(e=>refs.includes(e.event_id)).map(e=>e.date))],dated=dates.length===1;
+      return {id:n.id,type:"planet",position:positions.get(n.id)??{x:0,y:0},selected:n.id===currentNode,data:{label:display(n.label),original:n,highlighted:Boolean(selectedEvent&&refs.includes(selectedEvent)),date:dated?dates[0]:asOf,dated},ariaLabel:n.type+": "+display(n.label),draggable:false,width:170,height:200,style:{width:156,height:164}};
+    }),[subset,positions,currentNode,selectedEvent,events,asOf]);
   const edges=useMemo<OrbitEdge[]>(()=>originalEdges.filter(e=>visible.has(e.source)&&visible.has(e.target)).map(e=>({id:e.id,source:e.source,target:e.target,type:"orbital",selected:e.id===currentEdge,focusable:true,data:{original:e,sourceRadius:radius(original.find(n=>n.id===e.source)!),targetRadius:radius(original.find(n=>n.id===e.target)!),showLabel:hoverEdge===e.id},ariaLabel:e.type+" from "+e.source+" to "+e.target})),[originalEdges,visible,currentEdge,hoverEdge,original]);
   const camera=useRef(0), initialized=useNodesInitialized({includeHiddenNodes:true});
   const cameraState=useRef({currentNode,positions,bounds});cameraState.current={currentNode,positions,bounds};
@@ -68,7 +71,7 @@ function Canvas({nodes:original,edges:originalEdges,selectedEvent,selection,asOf
     });
     return ()=>cancelAnimationFrame(raf);
   },[currentNode,signature,list,reduced,flow,positions,bounds,initialized]);
-  function inspectNode(node:GraphNode){onSelect(node.evidence_ids,node.event_id);onInspect({kind:"node",id:node.id});}
+  function inspectNode(node:GraphNode){onSelect(node.evidence_ids,linkedEvent(node,events,selectedEvent)?.event_id);onInspect({kind:"node",id:node.id});}
   function reset(){setAllContext(true);onInspect(null);}
   const prettyDate=dateDisplay(asOf);
   return <div ref={ref} className={"graph-container universe-canvas "+(list?"is-list":"")} data-initialized={String(initialized)} data-motion={reduced?"reduced":"standard"} data-selected-planet={currentNode??""}>
@@ -80,8 +83,8 @@ function Canvas({nodes:original,edges:originalEdges,selectedEvent,selection,asOf
     <ReactFlow<PlanetNode,OrbitEdge> nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} fitView fitViewOptions={{padding:.22,maxZoom:.85}} minZoom={.18} maxZoom={1.6} nodesConnectable={false} nodesDraggable={false} edgesReconnectable={false} deleteKeyCode={null} onNodeClick={(_,node)=>inspectNode(node.data.original)} onEdgeClick={(_,edge)=>{onSelect(edge.data!.original.evidence_ids);onInspect({kind:"edge",id:edge.id});}} onEdgeMouseEnter={(_,edge)=>setHoverEdge(edge.id)} onEdgeMouseLeave={()=>setHoverEdge(null)} onPaneClick={()=>{if(selection)reset();}} onKeyDown={event=>{
       if(event.key==="Enter"){const element=(event.target as HTMLElement).closest<HTMLElement>("[data-id]");const node=original.find(n=>n.id===element?.dataset.id);if(node){event.preventDefault();inspectNode(node);}else{const edge=originalEdges.find(e=>e.id===element?.dataset.id);if(edge){event.preventDefault();onSelect(edge.evidence_ids);onInspect({kind:"edge",id:edge.id});}}}
     }} ariaLabelConfig={{"node.a11yDescription.default":"Context planet. Press Enter to focus and inspect connections and sources.","controls.zoomIn.ariaLabel":"Zoom in","controls.zoomOut.ariaLabel":"Zoom out","controls.fitView.ariaLabel":"Fit view"}}><ViewportPortal><div className="solar-systems" aria-hidden="true">{systems.map(system=><div key={system.id} className={'solar-system '+(system.date?'dated-system':'shared-system')} data-system-date={system.date??'shared'} style={{left:system.x,top:system.y,width:system.size,height:system.size}}><div className="solar-system-heading"><span>{system.date?'Solar system':'Shared context'}</span><strong>{system.date?dateDisplay(system.date):'As of '+prettyDate}</strong><small>{system.nodeIds.length} planets{system.date?' · Same source date':' · Persistent source entities'}</small></div><div className="solar-system-orbit"/><div className="solar-system-inner-orbit"/></div>)}</div></ViewportPortal></ReactFlow>}
-    {!list&&<><div className="universe-caption"><Orbit size={14}/><span>{currentNode?"Selected planet orbit":"Solar systems grouped by source date"}</span></div><div className="graph-controls"><button aria-label="Zoom in" onClick={()=>void flow.zoomIn({duration:reduced?0:250})}><ZoomIn size={18}/></button><button aria-label="Zoom out" onClick={()=>void flow.zoomOut({duration:reduced?0:250})}><ZoomOut size={18}/></button><button aria-label="Fit universe" onClick={()=>{if(currentNode)void flow.fitView({padding:.22,duration:reduced?0:450,maxZoom:1});else if(ref.current)void flow.setViewport(systemViewport(bounds,ref.current.clientWidth,ref.current.clientHeight),{duration:reduced?0:450});}}><Maximize2 size={17}/></button><button aria-label="Focus selected event" disabled={!selectedEvent} onClick={()=>{const event=original.find(n=>n.id===selectedEvent);if(event)inspectNode(event);}}><LocateFixed size={18}/></button></div></>}
-    <div className="graph-legend universe-legend">{["Deal","Account","Person","Event","Interaction","Evidence"].map(type=><span key={type}><i className={"planet-swatch planet-"+type.toLowerCase()}/>{type}</span>)}<span className="legend-edge">— Verified</span><span className="legend-edge">┄ Inferred</span></div>
+    {!list&&<><div className="universe-caption"><Orbit size={14}/><span>{currentNode?"Selected planet orbit":"Solar systems grouped by source date"}</span></div><div className="graph-controls"><button aria-label="Zoom in" onClick={()=>void flow.zoomIn({duration:reduced?0:250})}><ZoomIn size={18}/></button><button aria-label="Zoom out" onClick={()=>void flow.zoomOut({duration:reduced?0:250})}><ZoomOut size={18}/></button><button aria-label="Fit universe" onClick={()=>{if(currentNode)void flow.fitView({padding:.22,duration:reduced?0:450,maxZoom:1});else if(ref.current)void flow.setViewport(systemViewport(bounds,ref.current.clientWidth,ref.current.clientHeight),{duration:reduced?0:450});}}><Maximize2 size={17}/></button><button aria-label="Focus selected event" disabled={!selectedEvent||!eventNode(selectedEvent,original)} onClick={()=>{const event=selectedEvent?eventNode(selectedEvent,original):null;if(event)inspectNode(event);}}><LocateFixed size={18}/></button></div></>}
+    <div className="graph-legend universe-legend">{["Deal","Account","Person","Event","Interaction","Evidence"].map(type=><span key={type}><i className={"planet-swatch planet-"+type.toLowerCase()}/>{type}</span>)}<span className="legend-edge">— Verified</span><span className="legend-edge">┄ Not verified</span></div>
   </div>;
 }
 export default function ContextGraph(props:Props){return <ReactFlowProvider><Canvas {...props}/></ReactFlowProvider>;}

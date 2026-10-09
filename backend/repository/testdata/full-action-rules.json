@@ -1,0 +1,18 @@
+{
+  "purpose": "Review metadata for deterministic O1 rules; not service-side configuration or an action fallback menu",
+  "taxonomy_version": "relio-actions-v1",
+  "relevance_version": "relio-relevance-v1",
+  "occurrence_source": "decision_log.csv",
+  "occurrence_id_format": "occ:decision:{native_decision_id}",
+  "rules": [
+    {"native_type":"diskon","native_value_rule":"integer percentage 0..100","action_type":"discount","template_id":"action:discount:{percentage*100}bps","context_keywords":["diskon","harga","budget","bujet","mahal"]},
+    {"native_type":"pengecualian","native_value_rule":"contains both starter and pilot case-insensitively","action_type":"starter_pilot","template_id":"action:starter_pilot","context_keywords":["pilot","uji coba"]},
+    {"native_type":"janji_fitur","native_value_rule":"native decision value; no fulfillment inferred","action_type":"feature_promise","template_id":"action:feature_promise","context_keywords":["janji fitur"]},
+    {"native_type":"eskalasi","native_value_rule":"native decision value; no resolution inferred","action_type":"escalation","template_id":"action:escalation","context_keywords":["eskalasi"]}
+  ],
+  "native_decision_status_mapping": {"Disetujui":"approved","Ditolak":"rejected","Menunggu":"requested"},
+  "relevance_source": {"source_file":"interactions.jsonl","source_field":"isi","scope":"visible primary account","match":"case-insensitive substring","meaning":"historical matching mention, not proof of unresolved gate or suitability"},
+  "required_support": ["visible dated occurrence","existing event","status proof","source field evidence","authorized primary or analog scope"],
+  "not_inferred": ["new request authorization","historical approver role","reference consent","applied contract without native FK","dated outcome","delivered reference from buyer request"],
+  "no_candidate_padding": true
+}

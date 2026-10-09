@@ -20,5 +20,5 @@ export default defineConfig({
   reporter:[["list"],["html",{open:"never"}]],
   use:{baseURL,headless:true,viewport:{width:1440,height:1000},screenshot:"only-on-failure",
     launchOptions:{executablePath:browserPath(),args:["--disable-gpu"]}},
-  webServer:{command:"npm run dev",url:baseURL,reuseExistingServer:true,timeout:120000}
+  webServer:{command:"npm run dev",url:baseURL,reuseExistingServer:true,timeout:120000,env:{RELIO_DATA_MODE:"local"}}
 });
