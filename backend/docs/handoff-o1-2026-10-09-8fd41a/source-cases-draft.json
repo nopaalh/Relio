@@ -1,0 +1,628 @@
+{
+  "status": "DRAFT — menunggu persetujuan Orang 2",
+  "artifact_kind": "source_based_handoff_cases_not_api_fixtures",
+  "created_date": "2026-10-09",
+  "source_verification": "Uses the audit verified earlier in this conversation; source files and current repo could not be re-read in this turn due local execution helper failure.",
+  "baseline_audit": "../source-audit-snapshot.json",
+  "max_as_of": "2026-10-01",
+  "expected_input_hashes": {
+    "bugs.csv": "0b7819d6141d4f4575bbb06e4bedab2d0a65436cba0e4a4a72b59e4a0ec86284",
+    "contact_employment_history.csv": "3303f80dd37584d3e7cd144583a35da435b93a3f84f6525e0172a168941910f5",
+    "contracts_billing.csv": "2c1d3df445c35aabcd04681044345e2aef25b3e7a496db712de9a6f4a986b1c5",
+    "crm_accounts.csv": "3dc0c08341e1ca72611c6e284d2102ce9669d05fbcf4d6ecb147b3221b17e083",
+    "crm_contacts.csv": "142d9ecf83b682b8bf66732390c256b70cd1be560ea1a9c92b592d763c24228e",
+    "crm_deals.csv": "21d8835a83b2361a9fd0d4104a758bc6c0fdab49988b73805ce9d8b2cc9c0ec1",
+    "decision_log.csv": "5a707967a82b17bde58bea5f68acfed6cfb7f5b36e49af607cbda78f48e3da17",
+    "employees.csv": "11796afdfe82395a2ae58b99b6107a60d9b10f34c4bc9f1cbafcc0aa7c2c1b4c",
+    "feature_usage_monthly.csv": "c3ed0614ef6b6216902ec1e044715812b3a5abeb81722f98da45945823b0550a",
+    "features.csv": "d2be61357b455440262ce3ea4ab774c483f14869dd4529c36a7e571f3619de43",
+    "interactions.jsonl": "62758f9927e748bccbe4ca22876417c0637e4d4beba7056c840f3086cd83bf2d",
+    "outlets.csv": "29035033b0a8bc955dc81967416bdaf0c2e98f72dd746fc46c8112a1b2a2dbca",
+    "product_usage_daily.csv": "0eedc7cf88d119e8a619320660eaee5ff4e3d4f507e8b336d7f964194b5024be",
+    "releases.csv": "ecffd9f446979f16ed738de17901db8d4c958c5bee6c2c65ecb3062be137cbdb",
+    "support_tickets.csv": "047b143e99b564d37e00f90115bece6e34b799708bcc8ce528a73d111637ed99"
+  },
+  "business_source_policy": "fixed dataset, static business database, no ETL or automatic ingestion",
+  "implementation_status": "No Go source, database schema, adapter, migration or shared contract changed by this packet.",
+  "distinctions": {
+    "source_observation": "Reproduce from native source records only after hash checks.",
+    "proposed_contract_expectation": "Acceptance assertion proposal; not an adapter result or approved DTO."
+  },
+  "cases": [
+    {
+      "case_id": "SRC-01",
+      "title": "P04 account and deal IDs are distinct",
+      "kind": "source_observation",
+      "sources": [
+        {
+          "file": "crm_deals.csv",
+          "key": {
+            "deal_id": "DL-004"
+          },
+          "fields": [
+            "account_id",
+            "dibuat"
+          ]
+        }
+      ],
+      "expected": {
+        "deal_id": "DL-004",
+        "account_id": "P04",
+        "created_date": "2026-08-05"
+      },
+      "forbidden": [
+        "Use P04 as native deal_id",
+        "Treat account metadata as historical without supporting source"
+      ]
+    },
+    {
+      "case_id": "SRC-02",
+      "title": "P04 native date filters",
+      "kind": "source_observation",
+      "sources": [
+        {
+          "file": "interactions.jsonl",
+          "account_id": "P04",
+          "fields": [
+            "interaction_id",
+            "tanggal",
+            "account_id"
+          ]
+        }
+      ],
+      "runs": [
+        {
+          "as_of": "2026-08-09",
+          "expected_interaction_ids": []
+        },
+        {
+          "as_of": "2026-08-10",
+          "expected_interaction_ids": [
+            "I0284"
+          ]
+        },
+        {
+          "as_of": "2026-08-28",
+          "expected_interaction_ids": [
+            "I0284",
+            "I0314"
+          ]
+        },
+        {
+          "as_of": "2026-09-01",
+          "expected_interaction_ids": [
+            "I0284",
+            "I0314"
+          ]
+        },
+        {
+          "as_of": "2026-09-21",
+          "expected_interaction_ids": [
+            "I0284",
+            "I0314"
+          ]
+        },
+        {
+          "as_of": "2026-09-22",
+          "expected_interaction_ids": [
+            "I0284",
+            "I0314",
+            "I0335"
+          ]
+        },
+        {
+          "as_of": "2026-10-01",
+          "expected_interaction_ids": [
+            "I0284",
+            "I0314",
+            "I0335"
+          ]
+        }
+      ],
+      "forbidden": [
+        "Treat these file filters as completed database query tests",
+        "Return I0335 body/claim for as_of before 2026-09-22"
+      ]
+    },
+    {
+      "case_id": "SRC-03",
+      "title": "P04 native account linkage does not supply deal linkage",
+      "kind": "source_observation",
+      "sources": [
+        {
+          "file": "interactions.jsonl",
+          "native_id": "I0284",
+          "fields": [
+            "account_id",
+            "membalas_id"
+          ]
+        },
+        {
+          "file": "interactions.jsonl",
+          "native_id": "I0314",
+          "fields": [
+            "account_id",
+            "membalas_id"
+          ]
+        },
+        {
+          "file": "interactions.jsonl",
+          "native_id": "I0335",
+          "fields": [
+            "account_id",
+            "membalas_id"
+          ]
+        }
+      ],
+      "expected": {
+        "account_id": "P04",
+        "native_deal_id_field_present": false,
+        "native_reply_link_count": 0
+      },
+      "forbidden": [
+        "Invent native interaction.deal_id",
+        "Generate reply FK from similar subject",
+        "Declare canonical graph edges approved"
+      ]
+    },
+    {
+      "case_id": "SRC-04",
+      "title": "P04 reference request quote is not consent",
+      "kind": "source_plus_proposed_contract_expectation",
+      "sources": [
+        {
+          "file": "interactions.jsonl",
+          "native_id": "I0335",
+          "field": "isi"
+        }
+      ],
+      "expected_source_excerpt": "Pak Bagus, Direktur Utama kami minta rekomendasi dari pengguna yang mirip dengan kami sebelum tanda tangan. Kami tunda dulu sampai ada referensi.",
+      "proposed_expectation": {
+        "claim_supported": "sender states procurement postponed until references are available",
+        "consent_status": "unknown unless separate scoped evidence exists",
+        "reference_customer_id": null
+      },
+      "forbidden": [
+        "Claim a reference customer already consented",
+        "Mark reference delivered/completed",
+        "Identify the director as K028 from title alone"
+      ]
+    },
+    {
+      "case_id": "SRC-05",
+      "title": "P05 empty account interaction context remains unknown",
+      "kind": "source_plus_proposed_contract_expectation",
+      "sources": [
+        {
+          "file": "crm_deals.csv",
+          "key": {
+            "deal_id": "DL-005"
+          }
+        },
+        {
+          "file": "interactions.jsonl",
+          "account_id": "P05"
+        }
+      ],
+      "expected_source": {
+        "deal_id": "DL-005",
+        "account_id": "P05",
+        "created_date": "2026-09-26",
+        "account_interaction_ids": [],
+        "explicit_decision_ids": [],
+        "usage_rows": 0
+      },
+      "proposed_expectation": {
+        "semantic_assessment": "insufficient_evidence",
+        "readiness_score": null
+      },
+      "forbidden": [
+        "Say Sales never contacted account",
+        "Convert missing evidence to readiness zero",
+        "Create extra action options"
+      ]
+    },
+    {
+      "case_id": "SRC-06",
+      "title": "Snapshot commercial fields are not historical facts",
+      "kind": "proposed_contract_expectation_grounded_in_source",
+      "sources": [
+        {
+          "file": "crm_deals.csv",
+          "key": {
+            "deal_id": "DL-004"
+          },
+          "fields": [
+            "stage",
+            "stage_sejak",
+            "owner_id",
+            "outlet",
+            "nilai_tahunan"
+          ]
+        }
+      ],
+      "expected_source_snapshot": {
+        "stage": "Negosiasi",
+        "stage_since": "2026-09-01",
+        "owner_id": "E06",
+        "planned_outlets": "35",
+        "potential_acv_idr": "147000000"
+      },
+      "proposed_historical_expectation": {
+        "as_of": "2026-09-01",
+        "value_availability": "snapshot_only_without_independent_history",
+        "stage_value": null,
+        "owner_value": null,
+        "planned_outlets_value": null,
+        "potential_acv_value": null
+      },
+      "forbidden": [
+        "Backfill all values from 2026-10-01 snapshot",
+        "Infer complete stage history from stage_sejak",
+        "Treat I0314 narrative as a native stage-transition log"
+      ]
+    },
+    {
+      "case_id": "SRC-07",
+      "title": "Stale champion pointer and current contact account",
+      "kind": "source_observation",
+      "sources": [
+        {
+          "file": "crm_accounts.csv",
+          "key": {
+            "account_id": "C01"
+          },
+          "field": "champion_contact_id"
+        },
+        {
+          "file": "crm_contacts.csv",
+          "key": {
+            "contact_id": "K017"
+          },
+          "field": "account_id_saat_ini"
+        }
+      ],
+      "expected": {
+        "crm_champion_pointer": "K017",
+        "current_contact_account": "P01",
+        "observed_mismatch_count": 1
+      },
+      "forbidden": [
+        "Repair raw CSV silently",
+        "Treat snapshot champion pointer as verified active C01 employment"
+      ]
+    },
+    {
+      "case_id": "SRC-08",
+      "title": "Historical email not automatically verified by current email match",
+      "kind": "source_plus_proposed_contract_expectation",
+      "sources": [
+        {
+          "file": "interactions.jsonl",
+          "native_ids": [
+            "I0051",
+            "I0066",
+            "I0159",
+            "I0223",
+            "I0224",
+            "I0290"
+          ],
+          "fields": [
+            "dari",
+            "ke"
+          ]
+        },
+        {
+          "file": "crm_contacts.csv",
+          "field": "email"
+        }
+      ],
+      "expected_source": {
+        "unmatched_current_address": "rina.hapsari@kopilintas.co.id",
+        "interaction_ids": [
+          "I0051",
+          "I0066",
+          "I0159",
+          "I0223",
+          "I0224",
+          "I0290"
+        ],
+        "occurrences": 6
+      },
+      "proposed_expectation": {
+        "verification": "keep alias resolution unverified until reviewed cross-source rule is approved"
+      },
+      "forbidden": [
+        "Merge solely by same name/local-part",
+        "Report six distinct unmatched email addresses"
+      ]
+    },
+    {
+      "case_id": "SRC-09",
+      "title": "Employment overlap does not mean duplicate identity",
+      "kind": "source_plus_proposed_contract_expectation",
+      "sources": [
+        {
+          "file": "contact_employment_history.csv",
+          "fields": [
+            "contact_id",
+            "mulai",
+            "selesai"
+          ]
+        }
+      ],
+      "expected_source": {
+        "strict_overlap_pairs": 10,
+        "contact_ids": [
+          "K035",
+          "K039",
+          "K041",
+          "K084",
+          "K087",
+          "K091",
+          "K092",
+          "K113",
+          "K117",
+          "K148"
+        ]
+      },
+      "proposed_expectation": {
+        "handling": "preserve source intervals and uncertainty; parallel employment is possible"
+      },
+      "forbidden": [
+        "Auto-truncate intervals",
+        "Choose first employer silently",
+        "Decide inclusive/exclusive end-day semantics without agreement"
+      ]
+    },
+    {
+      "case_id": "SRC-10",
+      "title": "Optional missing numeric values remain missing",
+      "kind": "source_plus_proposed_contract_expectation",
+      "sources": [
+        {
+          "file": "product_usage_daily.csv",
+          "field": "transaksi_offline_tersinkron"
+        },
+        {
+          "file": "outlets.csv",
+          "field": "mode_offline_aktif"
+        }
+      ],
+      "expected_source": {
+        "missing_offline_values": 215350,
+        "offline_disabled_outlets": 590,
+        "offline_enabled_outlets": 30,
+        "days_per_outlet": 365
+      },
+      "proposed_expectation": {
+        "handling": "blank offline-disabled field is not observed zero"
+      },
+      "forbidden": [
+        "Impute zero for blank offline values",
+        "Attach customer usage to prospect"
+      ]
+    },
+    {
+      "case_id": "SRC-11",
+      "title": "Explicit decision link absence is not rejection",
+      "kind": "source_plus_proposed_contract_expectation",
+      "sources": [
+        {
+          "file": "decision_log.csv",
+          "field": "deal_id"
+        }
+      ],
+      "expected_source": {
+        "explicit_deal_links": 3,
+        "total_records": 30,
+        "prospect_deal_ids": [
+          "DL-001",
+          "DL-002",
+          "DL-003",
+          "DL-004",
+          "DL-005"
+        ],
+        "prospect_explicit_decision_links": [
+          {
+            "deal_id": "DL-001",
+            "decision_ids": []
+          },
+          {
+            "deal_id": "DL-002",
+            "decision_ids": []
+          },
+          {
+            "deal_id": "DL-003",
+            "decision_ids": []
+          },
+          {
+            "deal_id": "DL-004",
+            "decision_ids": []
+          },
+          {
+            "deal_id": "DL-005",
+            "decision_ids": []
+          }
+        ]
+      },
+      "proposed_expectation": {
+        "approval_status": "unknown without valid request-scoped supporting evidence"
+      },
+      "forbidden": [
+        "Convert missing decision link to rejected",
+        "Grant prospect approval from another account precedent",
+        "Declare a valid action comparison set merely from global catalog records"
+      ]
+    },
+    {
+      "case_id": "SRC-12",
+      "title": "Selected evidence must not leak future context",
+      "kind": "proposed_contract_expectation_grounded_in_source",
+      "sources": [
+        {
+          "file": "interactions.jsonl",
+          "native_id": "I0335",
+          "fields": [
+            "tanggal",
+            "isi"
+          ]
+        }
+      ],
+      "run": {
+        "as_of": "2026-09-01",
+        "target_source_id": "I0335"
+      },
+      "proposed_expectation": {
+        "source_record_visible": false,
+        "quote_visible": false,
+        "model_input_includes_quote": false
+      },
+      "forbidden": [
+        "Filter timeline but retain future quote in evidence/JEV/Copilot context",
+        "Present source-only packet as a production repository response"
+      ]
+    },
+    {
+      "case_id": "SRC-13",
+      "title": "P02 documented 20 percent request is not approval",
+      "kind": "source_plus_proposed_contract_expectation",
+      "sources": [
+        {
+          "file": "interactions.jsonl",
+          "native_id": "I0348",
+          "fields": [
+            "tanggal",
+            "account_id",
+            "dari",
+            "ke",
+            "isi"
+          ]
+        },
+        {
+          "file": "decision_log.csv",
+          "field": "deal_id"
+        }
+      ],
+      "expected_source": {
+        "interaction_date": "2026-09-28",
+        "account_id": "P02",
+        "sender": "citra@kasirnusa.id",
+        "recipient": "andi@kasirnusa.id",
+        "excerpt": "Pak Andi, untuk menutup Teras Kafe saya usul diskon 20% agar menyamai KasirPro. Mohon keputusan.",
+        "explicit_decision_ids_for_DL002": []
+      },
+      "proposed_expectation": {
+        "request_or_proposal_visible": true,
+        "approval_status": "unknown without valid separate evidence",
+        "vp_approval_required_for_requested_discount": true,
+        "approved_value": null
+      },
+      "forbidden": [
+        "Interpret request sent to VP as VP approval",
+        "Reuse C23 20 percent rejection or pilot approval as P02 decision",
+        "Approve or execute commercial action"
+      ]
+    },
+    {
+      "case_id": "SRC-14",
+      "title": "Retrospective winner text must not support August history",
+      "kind": "source_plus_proposed_contract_expectation",
+      "sources": [
+        {
+          "file": "decision_log.csv",
+          "native_id": "D-2025-06",
+          "fields": [
+            "tanggal",
+            "deal_id",
+            "keputusan",
+            "nilai",
+            "alasan"
+          ]
+        },
+        {
+          "file": "crm_deals.csv",
+          "key": {
+            "deal_id": "DL-007"
+          },
+          "field": "stage_sejak"
+        }
+      ],
+      "expected_source": {
+        "decision_date": "2025-08-12",
+        "deal_id": "DL-007",
+        "decision": "Disetujui",
+        "decision_value": "Paket Starter tanpa diskon, pilot 6 outlet",
+        "retrospective_text": "Deal menang Sep 2025.",
+        "snapshot_stage_since": "2025-09-08"
+      },
+      "proposed_run": {
+        "as_of": "2025-08-12",
+        "winner_outcome_usable": false,
+        "approved_offer_must_not_be_completed_pilot": true
+      },
+      "forbidden": [
+        "Expose all decision.alasan just because record tanggal is earlier",
+        "Claim the pilot caused Won",
+        "Invent a precise outcome date from September text or current stage_since"
+      ]
+    },
+    {
+      "case_id": "SRC-15",
+      "title": "Native approval and contract references remain separate",
+      "kind": "source_plus_proposed_contract_expectation",
+      "sources": [
+        {
+          "file": "decision_log.csv",
+          "native_id": "D-2025-11",
+          "fields": [
+            "tanggal",
+            "account_id",
+            "deal_id",
+            "nilai",
+            "bukti_interaction_id"
+          ]
+        },
+        {
+          "file": "interactions.jsonl",
+          "native_id": "I0061",
+          "field": "isi"
+        },
+        {
+          "file": "contracts_billing.csv",
+          "native_id": "K-C01",
+          "fields": [
+            "account_id",
+            "decision_id",
+            "mulai",
+            "diskon_pct"
+          ]
+        }
+      ],
+      "expected_source": {
+        "account_id": "C01",
+        "deal_id": "DL-008",
+        "decision_id": "D-2025-11",
+        "decision_date": "2025-11-28",
+        "interaction_evidence_id": "I0061",
+        "decision_discount": "15%",
+        "contract_id": "K-C01",
+        "contract_start_date": "2025-12-15",
+        "contract_discount_pct": "15",
+        "contract_decision_link": "D-2025-11"
+      },
+      "proposed_run": {
+        "as_of": "2025-12-01",
+        "approval_and_application_have_distinct_source_locators": true,
+        "contract_start_is_after_as_of": true,
+        "no_current_contract_application_claim_before_start": true
+      },
+      "forbidden": [
+        "Conflate approval event date and later contract start",
+        "Infer all requests at 15 percent are approved",
+        "Transfer C01 approval to P02/P04"
+      ]
+    }
+  ],
+  "case_count": 15
+}
