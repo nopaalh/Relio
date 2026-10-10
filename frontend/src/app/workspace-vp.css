@@ -30,3 +30,20 @@
 .shared-system .solar-system-orbit{border-color:#9AAEDA55;background:radial-gradient(ellipse,#6C89C51A,transparent 72%)}
 .shared-system .solar-system-heading span{color:#BDD0F6}
 @media(max-width:1100px){.sidebar .brand img{width:34px}.sidebar .brand{height:44px}.nav-collapsed .brand-universe-note{display:none}}
+
+/* One restrained orbital illustration gives the dashboard a Relio-specific entry point; it carries no deal data. */
+.main-content.dashboard-workspace .page-heading{position:relative;isolation:isolate;min-height:124px;align-items:center}
+.main-content.dashboard-workspace .page-heading>div:first-child{max-width:min(760px,calc(100% - 340px))}
+.main-content.dashboard-workspace .page-heading:after{content:"";position:absolute;z-index:-1;right:188px;top:50%;width:78px;height:78px;border:1px solid #9B84D577;border-radius:50%;transform:translateY(-50%);background:radial-gradient(circle at 34% 29%,#FFFFFF 0 2%,#D7C5FF 6%,#A78BFA 25%,#7052E8 58%,#342454 100%);box-shadow:inset -7px -9px 15px #18112E44,0 0 0 10px #7052E80B,0 0 35px #7052E822}
+.main-content.dashboard-workspace .page-heading:before{content:"";position:absolute;z-index:-1;right:178px;top:calc(50% - 39px);width:9px;height:9px;border:2px solid var(--relio-bg);border-radius:50%;background:var(--relio-evidence-mark);box-shadow:0 0 0 1px #087C7266}
+.main-content.dashboard-workspace .overview-metrics{gap:0;border:1px solid #DDD5EE;border-radius:14px;background:#FFFFFFD9;overflow:hidden}
+.main-content.dashboard-workspace .overview-card{min-width:0;border:0;border-radius:0;background:transparent;padding:20px 22px;position:relative}
+.main-content.dashboard-workspace .overview-card+.overview-card:before{content:"";position:absolute;left:0;top:21px;bottom:21px;width:1px;background:#E7E1F0}
+.main-content.dashboard-workspace .overview-card:first-child .metric-value{color:#6041CB}
+.main-content.dashboard-workspace .overview-card>p{line-height:1.6}
+.universe-navigator{box-shadow:0 1px 2px #21133C08}
+.investigation-header{margin-top:4px}
+.graph-panel{box-shadow:0 8px 28px #15122B10}
+.graph-panel .compact-panel-heading h3 svg{filter:drop-shadow(0 0 7px #C0A2FF45)}
+@media(max-width:1100px){.main-content.dashboard-workspace .page-heading:before,.main-content.dashboard-workspace .page-heading:after{display:none}.main-content.dashboard-workspace .page-heading>div:first-child{max-width:100%}.main-content.dashboard-workspace .page-heading{min-height:0}}
+@media(max-width:600px){.main-content.dashboard-workspace .overview-metrics{border-radius:12px}.main-content.dashboard-workspace .overview-card{padding:14px 12px}.main-content.dashboard-workspace .overview-card+.overview-card:before{top:15px;bottom:15px}.investigation-header{margin-top:8px}.main-content.detail-workspace .snapshot-label{display:none}.main-content.detail-workspace .snapshot-bar{min-height:56px;padding:6px 10px;justify-content:flex-end;margin-bottom:16px}.main-content.detail-workspace .page-heading{margin-bottom:13px}.main-content.detail-workspace .page-heading>div:first-child{min-width:0}.main-content.detail-workspace .detail-title h1{font-size:23px;letter-spacing:-.7px}.universe-navigator .history-tools .history-scrubber{display:none}.universe-navigator .history-tools{margin-top:0}.universe-navigator .date-rail{scroll-snap-type:x mandatory}.universe-navigator .date-rail>button{scroll-snap-align:start}}
